@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Бронирование переговорных комнат</title>
+    
+    <!-- Подключаем отдельный CSS файл -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- ===== ВЕРХНЯЯ ПАНЕЛЬ ===== -->
+        <header class="header">
+            <h1>
+                📅 Бронирование переговорных
+                <span>Beta</span>
+            </h1>
+            
+            <div class="header-controls">
+                <!-- Имя пользователя -->
+                <span id="userName" style="font-weight: 600; color: #4a6cf7;">Загрузка...</span>
+                
+                <!-- Кнопка выхода -->
+                <button class="btn btn-outline" onclick="logout()" style="border-color: #dc3545; color: #dc3545;">
+                    🚪 Выйти
+                </button>
+                
+                <!-- Выбор даты -->
+                <input type="date" id="datePicker">
+                
+                <!-- Кнопка обновления -->
+                <button class="btn btn-outline" onclick="refreshSchedule()">
+                    🔄 Обновить
+                </button>
+                
+                <!-- Кнопка "Мои брони" -->
+                <button class="btn btn-primary" onclick="goToMyBookings()">
+                    📋 Мои брони
+                </button>
+            </div>
+        </header>
+
+        <!-- ===== СТАТИСТИКА ===== -->
+        <div class="stats" id="statsPanel">
+            <div class="stat-item">
+                Всего комнат: <strong id="totalRooms">0</strong>
+            </div>
+            <div class="stat-item">
+                Свободно сейчас: <strong id="freeNow">0</strong>
+            </div>
+            <div class="stat-item">
+                Мои брони сегодня: <strong id="myBookingsToday">0</strong>
+            </div>
+        </div>
+
+        <!-- ===== ФИЛЬТРЫ ===== -->
+        <div class="filters">
+            <label>
+                Вместимость:
+                <select id="capacityFilter">
+                    <option value="0">Все</option>
+                    <option value="4">От 4 человек</option>
+                    <option value="6">От 6 человек</option>
+                    <option value="10">От 10 человек</option>
+                </select>
+            </label>
+            
+            <label>
+                <input type="checkbox" id="projectorFilter"> Только с проектором
+            </label>
+            
+            <label>
+                <input type="checkbox" id="whiteboardFilter"> Только с доской
+            </label>
+            
+            <button class="btn btn-outline" onclick="applyFilters()" style="padding: 6px 16px;">
+                Применить
+            </button>
+        </div>
+
+        <!-- ===== СЕТКА БРОНИРОВАНИЯ ===== -->
+        <div class="table-wrapper">
+            <table id="scheduleTable">
+                <thead>
+                    <tr>
+                        <th class="time-header">Время</th>
+                        <!-- Сюда JavaScript добавит колонки с комнатами -->
+                    </tr>
+                </thead>
+                <tbody id="scheduleBody">
+                    <!-- Сюда JavaScript добавит строки с временем и ячейками -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ===== ПОДВАЛ ===== -->
+        <div class="footer">
+            <span>⬜ Свободно</span>
+            <span>🔴 Занято</span>
+            <span>⭐ Моё бронирование (кликните для отмены)</span>
+            <span style="margin-left: auto; color: #999; font-size: 13px;">
+                Кликните по свободной ячейке для бронирования
+            </span>
+        </div>
+    </div>
+
+    <!-- ===== МОДАЛЬНОЕ ОКНО ДЛЯ БРОНИРОВАНИЯ ===== -->
+    <div class="modal-overlay" id="bookingModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <h3 id="modalTitle">📝 Новое бронирование</h3>
+            
+            <div class="modal-body">
+                <p><strong>Комната:</strong> <span id="modalRoomName"></span></p>
+                <p><strong>Дата:</strong> <span id="modalDate"></span></p>
+                <p><strong>Время:</strong> <span id="modalTime"></span></p>
+                
+                <div class="form-group">
+                    <label for="topicInput">Тема встречи *</label>
+                    <input type="text" id="topicInput" placeholder="Например: Планерка команды" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="durationInput">Длительность (часы)</label>
+                    <input type="number" id="durationInput" value="1" min="0.5" max="4" step="0.5">
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="needProjector"> Нужен проектор
+                    </label>
+                </div>
+                
+                <button class="btn btn-primary" onclick="confirmBooking()" style="width: 100%; padding: 12px;">
+                    ✅ Забронировать
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ПОДКЛЮЧАЕМ JAVASCRIPT ===== -->
+    <script src="script.js"></script>
+</body>
+</html>
