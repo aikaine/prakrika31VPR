@@ -67,6 +67,21 @@
         .btn-primary:hover {
             background: #3a5bd9;
         }
+        .btn-secondary {
+            width: 100%;
+            padding: 12px;
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
         .toggle-link {
             text-align: center;
             margin-top: 15px;
@@ -80,19 +95,46 @@
             color: #3a5bd9;
         }
         .error-message {
-            color: red;
+            color: #dc3545;
             text-align: center;
             margin-bottom: 15px;
             display: none;
+            font-size: 14px;
         }
         .success-message {
-            color: green;
+            color: #28a745;
             text-align: center;
             margin-bottom: 15px;
             display: none;
+            font-size: 14px;
         }
         .hidden {
-            display: none;
+            display: none !important;
+        }
+        .forgot-link {
+            text-align: right;
+            margin-top: 8px;
+            font-size: 14px;
+        }
+        .forgot-link a {
+            color: #6c757d;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .forgot-link a:hover {
+            color: #4a6cf7;
+            text-decoration: underline;
+        }
+        /* Стили для формы сброса пароля */
+        .reset-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e9ecef;
+        }
+        .reset-section h3 {
+            text-align: center;
+            color: #1a1a2e;
+            margin-bottom: 15px;
         }
     </style>
 </head>
@@ -103,7 +145,9 @@
         <div id="errorMessage" class="error-message"></div>
         <div id="successMessage" class="success-message"></div>
         
-        <!-- Форма входа -->
+        <!-- ============================================ -->
+        <!-- ФОРМА ВХОДА -->
+        <!-- ============================================ -->
         <div id="loginForm">
             <h2 style="text-align: center; margin-bottom: 20px;">Вход</h2>
             <div class="form-group">
@@ -115,12 +159,20 @@
                 <input type="password" id="loginPassword" placeholder="••••••" value="123456">
             </div>
             <button class="btn-primary" onclick="handleLogin()">Войти</button>
+            
+            <!-- ★ НОВАЯ ССЫЛКА "ЗАБЫЛИ ПАРОЛЬ?" ★ -->
+            <div class="forgot-link">
+                <a onclick="showResetForm()">Забыли пароль?</a>
+            </div>
+            
             <div class="toggle-link">
                 Нет аккаунта? <a onclick="showRegister()">Зарегистрироваться</a>
             </div>
         </div>
         
-        <!-- Форма регистрации -->
+        <!-- ============================================ -->
+        <!-- ФОРМА РЕГИСТРАЦИИ -->
+        <!-- ============================================ -->
         <div id="registerForm" class="hidden">
             <h2 style="text-align: center; margin-bottom: 20px;">Регистрация</h2>
             <div class="form-group">
@@ -140,38 +192,113 @@
                 Уже есть аккаунт? <a onclick="showLogin()">Войти</a>
             </div>
         </div>
+        
+        <!-- ============================================ -->
+        <!-- ★ НОВАЯ ФОРМА: ВОССТАНОВЛЕНИЕ ПАРОЛЯ ★ -->
+        <!-- ============================================ -->
+        <div id="resetForm" class="hidden">
+            <h2 style="text-align: center; margin-bottom: 20px;">🔑 Восстановление пароля</h2>
+            
+            <!-- Шаг 1: Ввод email -->
+            <div id="resetStep1">
+                <div class="form-group">
+                    <label>Введите ваш Email</label>
+                    <input type="email" id="resetEmail" placeholder="user@example.com">
+                </div>
+                <button class="btn-primary" onclick="checkEmail()">Проверить email</button>
+                <div class="toggle-link">
+                    <a onclick="showLogin()">← Вернуться ко входу</a>
+                </div>
+            </div>
+            
+            <!-- Шаг 2: Ввод нового пароля (показывается после проверки email) -->
+            <div id="resetStep2" class="hidden">
+                <p style="text-align: center; color: #28a745;">
+                    ✅ Email найден! Введите новый пароль.
+                </p>
+                <div class="form-group">
+                    <label>Новый пароль (минимум 6 символов)</label>
+                    <input type="password" id="resetNewPassword" placeholder="Новый пароль">
+                </div>
+                <div class="form-group">
+                    <label>Повторите новый пароль</label>
+                    <input type="password" id="resetConfirmPassword" placeholder="Повторите пароль">
+                </div>
+                <button class="btn-primary" onclick="resetPassword()">Сменить пароль</button>
+                <div class="toggle-link">
+                    <a onclick="showLogin()">← Вернуться ко входу</a>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
+        // ============================================
+        // ОБЩИЕ ФУНКЦИИ
+        // ============================================
+        
         function showError(message) {
             const el = document.getElementById('errorMessage');
             el.textContent = message;
             el.style.display = 'block';
-            setTimeout(() => el.style.display = 'none', 5000);
+            document.getElementById('successMessage').style.display = 'none';
+            setTimeout(() => el.style.display = 'none', 6000);
         }
         
         function showSuccess(message) {
             const el = document.getElementById('successMessage');
             el.textContent = message;
             el.style.display = 'block';
-            setTimeout(() => el.style.display = 'none', 5000);
+            document.getElementById('errorMessage').style.display = 'none';
+            setTimeout(() => el.style.display = 'none', 6000);
         }
         
         function showRegister() {
             document.getElementById('loginForm').classList.add('hidden');
             document.getElementById('registerForm').classList.remove('hidden');
+            document.getElementById('resetForm').classList.add('hidden');
             document.getElementById('errorMessage').style.display = 'none';
         }
         
         function showLogin() {
             document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('resetForm').classList.add('hidden');
             document.getElementById('loginForm').classList.remove('hidden');
             document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+            // Сбрасываем форму сброса
+            document.getElementById('resetStep1').classList.remove('hidden');
+            document.getElementById('resetStep2').classList.add('hidden');
+            document.getElementById('resetEmail').value = '';
+            document.getElementById('resetNewPassword').value = '';
+            document.getElementById('resetConfirmPassword').value = '';
         }
         
+        function showResetForm() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('resetForm').classList.remove('hidden');
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+            // Сбрасываем шаги
+            document.getElementById('resetStep1').classList.remove('hidden');
+            document.getElementById('resetStep2').classList.add('hidden');
+            document.getElementById('resetEmail').value = '';
+            document.getElementById('resetNewPassword').value = '';
+            document.getElementById('resetConfirmPassword').value = '';
+        }
+        
+        // ============================================
+        // ВХОД
+        // ============================================
         async function handleLogin() {
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                showError('Заполните все поля');
+                return;
+            }
             
             try {
                 const response = await fetch('api/login.php', {
@@ -195,6 +322,9 @@
             }
         }
         
+        // ============================================
+        // РЕГИСТРАЦИЯ
+        // ============================================
         async function handleRegister() {
             const full_name = document.getElementById('registerName').value;
             const email = document.getElementById('registerEmail').value;
@@ -225,13 +355,108 @@
             }
         }
         
-        // Enter для входа
+        // ============================================
+        // ★ НОВЫЕ ФУНКЦИИ: ВОССТАНОВЛЕНИЕ ПАРОЛЯ ★
+        // ============================================
+        
+        // Шаг 1: Проверка email
+        async function checkEmail() {
+            const email = document.getElementById('resetEmail').value.trim();
+            
+            if (!email) {
+                showError('Введите ваш email');
+                return;
+            }
+            
+            try {
+                const response = await fetch('api/check_email.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                
+                const data = await response.json();
+                
+                if (data.exists) {
+                    // Email найден → показываем шаг 2
+                    document.getElementById('resetStep1').classList.add('hidden');
+                    document.getElementById('resetStep2').classList.remove('hidden');
+                    document.getElementById('errorMessage').style.display = 'none';
+                    showSuccess('✅ Email подтверждён! Введите новый пароль.');
+                } else {
+                    showError('❌ Пользователь с таким email не найден');
+                }
+            } catch (error) {
+                showError('Ошибка подключения к серверу');
+            }
+        }
+        
+        // Шаг 2: Сброс пароля
+        async function resetPassword() {
+            const email = document.getElementById('resetEmail').value.trim();
+            const newPassword = document.getElementById('resetNewPassword').value;
+            const confirmPassword = document.getElementById('resetConfirmPassword').value;
+            
+            // Проверка: пароль не пустой
+            if (!newPassword || !confirmPassword) {
+                showError('Заполните оба поля с паролем');
+                return;
+            }
+            
+            // Проверка: длина пароля
+            if (newPassword.length < 6) {
+                showError('Пароль должен быть минимум 6 символов');
+                return;
+            }
+            
+            // Проверка: пароли совпадают
+            if (newPassword !== confirmPassword) {
+                showError('Пароли не совпадают');
+                return;
+            }
+            
+            try {
+                const response = await fetch('api/reset_password.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, new_password: newPassword })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showSuccess('✅ Пароль успешно изменён! Теперь войдите.');
+                    setTimeout(() => {
+                        showLogin();
+                    }, 2000);
+                } else {
+                    showError(data.error || 'Ошибка сброса пароля');
+                }
+            } catch (error) {
+                showError('Ошибка подключения к серверу');
+            }
+        }
+        
+        // Enter для всех форм
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Enter') {
+                // Форма входа
                 if (!document.getElementById('loginForm').classList.contains('hidden')) {
                     handleLogin();
-                } else {
+                }
+                // Форма регистрации
+                else if (!document.getElementById('registerForm').classList.contains('hidden')) {
                     handleRegister();
+                }
+                // Форма сброса — шаг 1
+                else if (!document.getElementById('resetForm').classList.contains('hidden') && 
+                         !document.getElementById('resetStep1').classList.contains('hidden')) {
+                    checkEmail();
+                }
+                // Форма сброса — шаг 2
+                else if (!document.getElementById('resetForm').classList.contains('hidden') && 
+                         !document.getElementById('resetStep2').classList.contains('hidden')) {
+                    resetPassword();
                 }
             }
         });
